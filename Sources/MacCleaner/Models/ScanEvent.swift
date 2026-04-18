@@ -12,5 +12,6 @@ enum ScanEvent<Item: Sendable>: Sendable {
     case itemFound(Item)
     case skipped(SkippedLocation)
     case finished(ScanSummary)
+    case cancelled(ScanSummary)
     case failed(String)
 }

@@ -10,9 +10,11 @@ final class JunkFilesViewModel: ObservableObject {
     @Published private(set) var isScanning = false
     @Published var isShowingConfirmation = false
     @Published private(set) var lastCleanupError: String?
+    @Published private(set) var statusMessage: String?
 
     private let scanner: any Scanner<CleanableItem>
     private let trashService: any TrashServicing
+    private var scanTask: Task<Void, Never>?
 
     init(
         scanner: any Scanner<CleanableItem> = JunkFilesScanner(),
@@ -32,13 +34,31 @@ final class JunkFilesViewModel: ObservableObject {
         items.filter { selectedItemIDs.contains($0.id) }
     }
 
-    func scan() async {
+    deinit {
+        scanTask?.cancel()
+    }
+
+    func startScan() {
+        scanTask?.cancel()
+        scanTask = Task { [weak self] in
+            await self?.scan()
+        }
+    }
+
+    func cancelScan() {
+        scanTask?.cancel()
+        isScanning = false
+        statusMessage = "Scan stopped."
+    }
+
+    private func scan() async {
         items = []
         selectedItemIDs = []
         skippedLocations = []
         progress = nil
         summary = nil
         lastCleanupError = nil
+        statusMessage = nil
         isScanning = true
         var pendingItems: [CleanableItem] = []
 
@@ -68,6 +88,18 @@ final class JunkFilesViewModel: ObservableObject {
                 }
                 items.sort { $0.sizeInBytes > $1.sizeInBytes }
                 summary = value
+                statusMessage = "Scan finished."
+                scanTask = nil
+                isScanning = false
+            case .cancelled(let value):
+                if !pendingItems.isEmpty {
+                    items.append(contentsOf: pendingItems)
+                    pendingItems.removeAll(keepingCapacity: true)
+                }
+                items.sort { $0.sizeInBytes > $1.sizeInBytes }
+                summary = value
+                statusMessage = "Scan stopped."
+                scanTask = nil
                 isScanning = false
             case .failed(let message):
                 if !pendingItems.isEmpty {
@@ -76,10 +108,13 @@ final class JunkFilesViewModel: ObservableObject {
                 }
                 items.sort { $0.sizeInBytes > $1.sizeInBytes }
                 lastCleanupError = message
+                statusMessage = message
+                scanTask = nil
                 isScanning = false
             }
         }
 
+        scanTask = nil
         isScanning = false
     }
 

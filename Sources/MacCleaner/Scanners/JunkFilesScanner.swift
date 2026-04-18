@@ -29,6 +29,16 @@ struct JunkFilesScanner: Scanner {
                 var seenPaths = Set<String>()
 
                 for root in scanRoots {
+                    guard !Task.isCancelled else {
+                        continuation.yield(.cancelled(ScanSummary(
+                            itemsFound: itemsFound,
+                            skippedLocations: skippedLocations,
+                            totalBytes: totalBytes
+                        )))
+                        continuation.finish()
+                        return
+                    }
+
                     switch permissionCoordinator.validateReadAccess(to: root) {
                     case .denied(let reason):
                         skippedLocations += 1
@@ -44,11 +54,11 @@ struct JunkFilesScanner: Scanner {
                         break
                     }
 
-                    let resourceKeys: [URLResourceKey] = [.isRegularFileKey, .fileSizeKey]
+                    let resourceKeys: [URLResourceKey] = [.isRegularFileKey, .isSymbolicLinkKey, .fileSizeKey]
                     guard let enumerator = FileManager.default.enumerator(
                         at: root,
                         includingPropertiesForKeys: resourceKeys,
-                        options: [.skipsPackageDescendants],
+                        options: [.skipsPackageDescendants, .skipsHiddenFiles],
                         errorHandler: { _, _ in
                             true
                         }
@@ -59,8 +69,22 @@ struct JunkFilesScanner: Scanner {
                     }
 
                     while let fileURL = enumerator.nextObject() as? URL {
+                        guard !Task.isCancelled else {
+                            continuation.yield(.cancelled(ScanSummary(
+                                itemsFound: itemsFound,
+                                skippedLocations: skippedLocations,
+                                totalBytes: totalBytes
+                            )))
+                            continuation.finish()
+                            return
+                        }
+
                         do {
                             let values = try fileURL.resourceValues(forKeys: Set(resourceKeys))
+                            if values.isSymbolicLink == true {
+                                continue
+                            }
+
                             guard values.isRegularFile == true else {
                                 continue
                             }
@@ -85,7 +109,7 @@ struct JunkFilesScanner: Scanner {
 
                             if itemsFound.isMultiple(of: 200) {
                                 continuation.yield(.progress(ScanProgress(
-                                    phase: "Scanning \(root.lastPathComponent)",
+                                    phase: "Scanning \(root.lastPathComponent) (\(scannedLocations + 1)/\(scanRoots.count))",
                                     scannedLocations: scannedLocations,
                                     itemsFound: itemsFound,
                                     skippedLocations: skippedLocations
@@ -98,7 +122,7 @@ struct JunkFilesScanner: Scanner {
 
                     scannedLocations += 1
                     continuation.yield(.progress(ScanProgress(
-                        phase: "Finished \(root.lastPathComponent)",
+                        phase: "Finished \(root.lastPathComponent) (\(scannedLocations)/\(scanRoots.count))",
                         scannedLocations: scannedLocations,
                         itemsFound: itemsFound,
                         skippedLocations: skippedLocations

@@ -14,4 +14,17 @@ final class ScannerProtocolTests: XCTestCase {
         XCTAssertEqual(value.skippedLocations, 1)
         XCTAssertEqual(value.totalBytes, 4096)
     }
+
+    func test_cancelled_event_carries_summary_counts() {
+        let summary = ScanSummary(itemsFound: 5, skippedLocations: 2, totalBytes: 8192)
+        let event = ScanEvent<CleanableItem>.cancelled(summary)
+
+        guard case .cancelled(let value) = event else {
+            return XCTFail("Expected cancelled event")
+        }
+
+        XCTAssertEqual(value.itemsFound, 5)
+        XCTAssertEqual(value.skippedLocations, 2)
+        XCTAssertEqual(value.totalBytes, 8192)
+    }
 }

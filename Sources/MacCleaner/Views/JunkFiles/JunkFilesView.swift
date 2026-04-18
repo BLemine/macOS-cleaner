@@ -18,8 +18,12 @@ struct JunkFilesView: View {
         )
         .toolbar {
             ToolbarItemGroup {
-                Button("Scan") {
-                    Task { await viewModel.scan() }
+                Button(viewModel.isScanning ? "Stop" : "Scan") {
+                    if viewModel.isScanning {
+                        viewModel.cancelScan()
+                    } else {
+                        viewModel.startScan()
+                    }
                 }
                 .keyboardShortcut("r", modifiers: [.command])
 
@@ -52,6 +56,12 @@ struct JunkFilesView: View {
             if let progress = viewModel.progress, viewModel.isScanning {
                 ProgressView(progress.phase)
                     .controlSize(.large)
+            }
+
+            if let statusMessage = viewModel.statusMessage, !viewModel.isScanning {
+                Text(statusMessage)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

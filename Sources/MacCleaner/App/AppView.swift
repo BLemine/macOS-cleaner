@@ -35,5 +35,10 @@ struct AppView: View {
             }
             .navigationTitle(selectedCategory?.title ?? CleanerCategory.junkFiles.title)
         }
+        .onChange(of: selectedCategory) { _, newValue in
+            if newValue != .junkFiles {
+                junkFilesViewModel.cancelScan()
+            }
+        }
     }
 }
