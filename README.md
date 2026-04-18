@@ -13,15 +13,15 @@ Implemented today:
 - MVVM architecture
 - Shared async `Scanner` protocol using `AsyncStream`
 - Junk Files category UI and scanning flow
+- Large Apps category UI and scanning flow
 - Safe cleanup flow that moves items to Trash using `FileManager.trashItem()`
 - Confirmation sheet before cleanup
 - Sidebar navigation for all planned categories
 
 Not fully implemented yet:
-- Large Apps scanning
 - Unused Apps scanning
 - Large Caches scanning
-- Privileged helper for protected system locations
+- Privileged helper for admin-backed removal of protected apps
 - Polished permission UX for Full Disk Access / elevated access
 
 ## Safety Rules
@@ -34,7 +34,7 @@ The app is designed around conservative cleanup behavior:
 - Scanning is dry-run only and does not modify files.
 - The confirmation flow shows full paths and sizes before cleanup.
 
-## Implemented Category
+## Implemented Categories
 
 ### Junk Files
 
@@ -48,11 +48,19 @@ The Junk Files category scans common junk locations such as:
 
 The scanner is asynchronous and streams results incrementally to keep the UI responsive.
 
-## Planned Categories
-
 ### Large Apps
 
-Will scan `/Applications` and sort apps by bundle size descending.
+The Large Apps category scans `/Applications`, calculates app bundle sizes, and sorts results from largest to smallest.
+
+The current v1 behavior:
+
+- scans apps asynchronously
+- shows bundle path and bundle size
+- supports selection and confirmation before cleanup
+- flags protected apps as `Requires Admin`
+- disables Trash for selections that require elevated privileges
+
+## Planned Categories
 
 ### Unused Apps
 
@@ -105,23 +113,26 @@ This repo includes unit tests for:
 - scan event models
 - junk file scanner behavior
 - junk file view model behavior
+- large apps scanner behavior
+- large apps view model behavior
 - basic app shell expectations
 
 ## Known Limitations
 
-- Only Junk Files is implemented end to end right now.
+- Junk Files and Large Apps are implemented in v1.
 - Large cache trees can still take time to enumerate on real machines.
 - Protected folders may be skipped depending on macOS permissions.
-- The other sidebar categories are placeholders until their scanners and view models are implemented.
+- Protected apps in `/Applications` may require admin privileges and are not removable in v1.
+- The remaining sidebar categories are placeholders until their scanners and view models are implemented.
 
 ## Roadmap
 
 Short-term next steps:
 
 1. Finish stabilizing the Junk Files scan and cancel flow.
-2. Implement Large Apps end to end.
-3. Implement Large Caches as grouped cache ownership rather than every file row.
-4. Add proper permission guidance for protected locations.
+2. Implement Large Caches as grouped cache ownership rather than every file row.
+3. Implement Unused Apps using Spotlight metadata.
+4. Add proper privileged removal support for protected apps.
 5. Improve scan summaries and cleanup reporting.
 
 ## License

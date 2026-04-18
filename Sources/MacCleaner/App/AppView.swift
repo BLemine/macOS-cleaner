@@ -7,6 +7,7 @@ enum AppSelection {
 struct AppView: View {
     @State private var selectedCategory: CleanerCategory? = AppSelection.defaultCategory
     @StateObject private var junkFilesViewModel = JunkFilesViewModel()
+    @StateObject private var largeAppsViewModel = LargeAppsViewModel()
 
     var body: some View {
         NavigationSplitView {
@@ -17,10 +18,7 @@ struct AppView: View {
                 case .junkFiles:
                     JunkFilesView(viewModel: junkFilesViewModel)
                 case .largeApps:
-                    PlaceholderCategoryView(
-                        title: CleanerCategory.largeApps.title,
-                        description: "Large Apps will scan /Applications and rank bundles by size."
-                    )
+                    LargeAppsView(viewModel: largeAppsViewModel)
                 case .unusedApps:
                     PlaceholderCategoryView(
                         title: CleanerCategory.unusedApps.title,
@@ -38,6 +36,9 @@ struct AppView: View {
         .onChange(of: selectedCategory) { _, newValue in
             if newValue != .junkFiles {
                 junkFilesViewModel.cancelScan()
+            }
+            if newValue != .largeApps {
+                largeAppsViewModel.cancelScan()
             }
         }
     }

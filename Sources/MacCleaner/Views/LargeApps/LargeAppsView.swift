@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct JunkFilesView: View {
-    @ObservedObject var viewModel: JunkFilesViewModel
+struct LargeAppsView: View {
+    @ObservedObject var viewModel: LargeAppsViewModel
 
     var body: some View {
         VStack(spacing: 0) {
@@ -41,14 +41,14 @@ struct JunkFilesView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Junk Files")
+            Text("Large Apps")
                 .font(.system(size: 28, weight: .semibold, design: .rounded))
 
-            Text("Review cache files, logs, and crash reports before moving anything to Trash.")
+            Text("Review installed applications in /Applications, ordered by bundle size.")
                 .foregroundStyle(.secondary)
 
             HStack(spacing: 16) {
-                summaryChip(title: "Items", value: "\(viewModel.items.count)")
+                summaryChip(title: "Apps", value: "\(viewModel.items.count)")
                 summaryChip(title: "Selected", value: SizeFormatter.string(for: viewModel.totalSelectedBytes))
                 summaryChip(title: "Skipped", value: "\(viewModel.skippedLocations.count)")
             }
@@ -72,9 +72,9 @@ struct JunkFilesView: View {
         Group {
             if viewModel.items.isEmpty && !viewModel.isScanning {
                 ContentUnavailableView(
-                    "No Junk Files Yet",
-                    systemImage: "sparkles",
-                    description: Text("Run a scan to list cache files, logs, and crash reports that are safe to review.")
+                    "No Large Apps Yet",
+                    systemImage: "shippingbox",
+                    description: Text("Run a scan to analyze applications inside /Applications.")
                 )
             } else {
                 List(viewModel.items) { item in
@@ -90,8 +90,19 @@ struct JunkFilesView: View {
                         .labelsHidden()
 
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(item.name)
-                                .font(.headline)
+                            HStack(spacing: 8) {
+                                Text(item.name)
+                                    .font(.headline)
+
+                                if !viewModel.canTrashApp(item) {
+                                    Text("Requires Admin")
+                                        .font(.caption.weight(.semibold))
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 3)
+                                        .background(Color.orange.opacity(0.18), in: Capsule())
+                                        .foregroundStyle(.orange)
+                                }
+                            }
                             Text(item.path)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
@@ -126,10 +137,10 @@ struct JunkFilesView: View {
 
     private var confirmationSheet: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Move Selected Items To Trash")
+            Text("Move Selected Apps To Trash")
                 .font(.title2.weight(.semibold))
 
-            Text("Nothing will be permanently deleted. Review the full paths and sizes below before continuing.")
+            Text("Review the full app paths and bundle sizes before moving anything to Trash.")
                 .foregroundStyle(.secondary)
 
             List(viewModel.selectedItems) { item in
@@ -147,6 +158,12 @@ struct JunkFilesView: View {
                 Text(error)
                     .font(.caption)
                     .foregroundStyle(.red)
+            }
+
+            if let permissionExplanation = viewModel.permissionExplanation {
+                Text(permissionExplanation)
+                    .font(.caption)
+                    .foregroundStyle(.orange)
             }
 
             HStack {
@@ -173,6 +190,7 @@ struct JunkFilesView: View {
                         }
                     }
                 }
+                .disabled(!viewModel.canCleanSelected)
                 .keyboardShortcut(.defaultAction)
             }
         }

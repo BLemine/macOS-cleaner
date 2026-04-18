@@ -25,6 +25,9 @@
 		A10000100000000000000001 /* PlaceholderCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000100000000000000001 /* PlaceholderCategoryView.swift */; };
 		A10000110000000000000001 /* SizeFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000110000000000000001 /* SizeFormatter.swift */; };
 		A10000120000000000000001 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000120000000000000001 /* SidebarView.swift */; };
+		A10000130000000000000001 /* LargeAppsScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000140000000000000001 /* LargeAppsScanner.swift */; };
+		A10000140000000000000001 /* LargeAppsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000150000000000000001 /* LargeAppsViewModel.swift */; };
+		A10000150000000000000001 /* LargeAppsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000160000000000000001 /* LargeAppsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +50,9 @@
 		A20000110000000000000001 /* SizeFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SizeFormatter.swift; sourceTree = "<group>"; };
 		A20000120000000000000001 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		A20000130000000000000001 /* MacCleaner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacCleaner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A20000140000000000000001 /* LargeAppsScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeAppsScanner.swift; sourceTree = "<group>"; };
+		A20000150000000000000001 /* LargeAppsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeAppsViewModel.swift; sourceTree = "<group>"; };
+		A20000160000000000000001 /* LargeAppsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeAppsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +121,7 @@
 			isa = PBXGroup;
 			children = (
 				A20000090000000000000001 /* JunkFilesScanner.swift */,
+				A20000140000000000000001 /* LargeAppsScanner.swift */,
 			);
 			path = Scanners;
 			sourceTree = "<group>";
@@ -133,6 +140,7 @@
 			isa = PBXGroup;
 			children = (
 				A200000D0000000000000001 /* JunkFilesViewModel.swift */,
+				A20000150000000000000001 /* LargeAppsViewModel.swift */,
 				A200000E0000000000000001 /* PlaceholderCategoryViewModel.swift */,
 			);
 			path = ViewModels;
@@ -150,6 +158,7 @@
 			isa = PBXGroup;
 			children = (
 				A400000B0000000000000001 /* JunkFiles */,
+				A400000E0000000000000001 /* LargeApps */,
 				A400000C0000000000000001 /* Shared */,
 				A400000D0000000000000001 /* Sidebar */,
 			);
@@ -179,6 +188,14 @@
 				A20000120000000000000001 /* SidebarView.swift */,
 			);
 			path = Sidebar;
+			sourceTree = "<group>";
+		};
+		A400000E0000000000000001 /* LargeApps */ = {
+			isa = PBXGroup;
+			children = (
+				A20000160000000000000001 /* LargeAppsView.swift */,
+			);
+			path = LargeApps;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -267,6 +284,9 @@
 				A10000100000000000000001 /* PlaceholderCategoryView.swift in Sources */,
 				A10000110000000000000001 /* SizeFormatter.swift in Sources */,
 				A10000120000000000000001 /* SidebarView.swift in Sources */,
+				A10000130000000000000001 /* LargeAppsScanner.swift in Sources */,
+				A10000140000000000000001 /* LargeAppsViewModel.swift in Sources */,
+				A10000150000000000000001 /* LargeAppsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
