@@ -67,46 +67,30 @@ final class JunkFilesViewModel: ObservableObject {
             case .started:
                 progress = ScanProgress(phase: "Preparing scan", scannedLocations: 0, itemsFound: 0, skippedLocations: 0)
             case .progress(let value):
-                if !pendingItems.isEmpty {
-                    items.append(contentsOf: pendingItems)
-                    pendingItems.removeAll(keepingCapacity: true)
-                }
+                flushPendingItems(&pendingItems)
                 progress = value
             case .itemFound(let item):
                 pendingItems.append(item)
 
                 if pendingItems.count >= 200 {
-                    items.append(contentsOf: pendingItems)
-                    pendingItems.removeAll(keepingCapacity: true)
+                    flushPendingItems(&pendingItems)
                 }
             case .skipped(let location):
                 skippedLocations.append(location)
             case .finished(let value):
-                if !pendingItems.isEmpty {
-                    items.append(contentsOf: pendingItems)
-                    pendingItems.removeAll(keepingCapacity: true)
-                }
-                items.sort { $0.sizeInBytes > $1.sizeInBytes }
+                flushPendingItems(&pendingItems)
                 summary = value
                 statusMessage = "Scan finished."
                 scanTask = nil
                 isScanning = false
             case .cancelled(let value):
-                if !pendingItems.isEmpty {
-                    items.append(contentsOf: pendingItems)
-                    pendingItems.removeAll(keepingCapacity: true)
-                }
-                items.sort { $0.sizeInBytes > $1.sizeInBytes }
+                flushPendingItems(&pendingItems)
                 summary = value
                 statusMessage = "Scan stopped."
                 scanTask = nil
                 isScanning = false
             case .failed(let message):
-                if !pendingItems.isEmpty {
-                    items.append(contentsOf: pendingItems)
-                    pendingItems.removeAll(keepingCapacity: true)
-                }
-                items.sort { $0.sizeInBytes > $1.sizeInBytes }
+                flushPendingItems(&pendingItems)
                 lastCleanupError = message
                 statusMessage = message
                 scanTask = nil
@@ -116,6 +100,16 @@ final class JunkFilesViewModel: ObservableObject {
 
         scanTask = nil
         isScanning = false
+    }
+
+    private func flushPendingItems(_ pendingItems: inout [CleanableItem]) {
+        guard !pendingItems.isEmpty else {
+            return
+        }
+
+        items.append(contentsOf: pendingItems)
+        pendingItems.removeAll(keepingCapacity: true)
+        items.sort { $0.sizeInBytes > $1.sizeInBytes }
     }
 
     func toggleSelection(for id: UUID) {
